@@ -1,0 +1,18 @@
+{
+    "0": ["read", "Used"],
+    "56": ["clone", "WasTriggeredBy"],
+    "57": ["fork", "WasTriggeredBy"],
+    "58": ["vfork", "WasTriggeredBy"],
+    "105": ["setuid", "WasTriggeredBy"],
+    "113": ["setreuid", "WasTriggeredBy"],
+    "117": ["setresuid", "WasTriggeredBy"],
+    "122": ["setfsuid", "WasTriggeredBy"],
+    "106": ["setgid", "WasTriggeredBy"],
+    "114": ["setregid", "WasTriggeredBy"],
+    "119": ["setresgid", "WasTriggeredBy"],
+    "123": ["setfsgid", "WasTriggeredBy"],
+    "308": ["setns", "WasTriggeredBy"],
+    "272": ["unshare", "WasTriggeredBy"],
+    "60": ["exit", "WasTriggeredBy"],
+    "231": ["exitgroup", "WasTriggeredBy"]
+}

@@ -77,24 +77,24 @@ static string getInstructionString(Instruction *inst)
 static void parseInlineAssemblyString(string instructionString, CallInst *call)
 {
 
-    // errs() << "\n\n";
+    errs() << "\n\n";
     regex pattern("\"([^\"]*)\"");
     sregex_iterator start(instructionString.begin(), instructionString.end(), pattern);
     sregex_iterator end;
     for (sregex_iterator current = start; current != end; ++current)
     {
         smatch match = *current;
-        // errs() << match.str() << "\n";
+        errs() << match.str() << "\n";
     }
-    // errs() << "Parsing complete.\n";
+    errs() << "Parsing complete.\n";
 
     assert(call != NULL);
     int numOperands = call->getNumOperands();
     for (int i = 0; i < numOperands - 1; i++)
     {
         Value *operand = call->getArgOperand(i);
-        // operand->print(errs(), false);
-        // errs() << "\n";
+        operand->print(errs(), false);
+        errs() << "\n";
     }
 }
 

@@ -1,0 +1,66 @@
+; ModuleID = 'src/locale/wcsxfrm.c'
+source_filename = "src/locale/wcsxfrm.c"
+target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
+target triple = "x86_64-pc-linux-gnu"
+
+%struct.__locale_struct = type { [6 x %struct.__locale_map*] }
+%struct.__locale_map = type { i8*, i64, [24 x i8], %struct.__locale_map* }
+
+@wcsxfrm_l = weak alias i64 (i32*, i32*, i64, %struct.__locale_struct*), i64 (i32*, i32*, i64, %struct.__locale_struct*)* @__wcsxfrm_l
+
+; Function Attrs: nounwind optsize strictfp
+define i64 @__wcsxfrm_l(i32* noalias noundef %0, i32* noalias noundef %1, i64 noundef %2, %struct.__locale_struct* nocapture readnone %3) #0 {
+  %5 = tail call i64 @wcslen(i32* noundef %1) #2
+  %6 = icmp ult i64 %5, %2
+  br i1 %6, label %7, label %10
+
+7:                                                ; preds = %4
+  %8 = add nuw i64 %5, 1
+  %9 = tail call i32* @wmemcpy(i32* noundef %0, i32* noundef %1, i64 noundef %8) #2
+  br label %16
+
+10:                                               ; preds = %4
+  %11 = icmp eq i64 %2, 0
+  br i1 %11, label %16, label %12
+
+12:                                               ; preds = %10
+  %13 = add i64 %2, -1
+  %14 = tail call i32* @wmemcpy(i32* noundef %0, i32* noundef %1, i64 noundef %13) #2
+  %15 = getelementptr inbounds i32, i32* %0, i64 %13
+  store i32 0, i32* %15, align 4, !tbaa !3
+  br label %16
+
+16:                                               ; preds = %10, %12, %7
+  ret i64 %5
+}
+
+; Function Attrs: optsize
+declare i64 @wcslen(i32* noundef) local_unnamed_addr #1
+
+; Function Attrs: optsize
+declare i32* @wmemcpy(i32* noundef, i32* noundef, i64 noundef) local_unnamed_addr #1
+
+; Function Attrs: nounwind optsize strictfp
+define i64 @wcsxfrm(i32* noalias noundef %0, i32* noalias noundef %1, i64 noundef %2) local_unnamed_addr #0 {
+  %4 = tail call i64 asm "mov %fs:0,$0", "=r,~{dirflag},~{fpsr},~{flags}"() #3, !srcloc !7
+  %5 = tail call i64 @__wcsxfrm_l(i32* noundef %0, i32* noundef %1, i64 noundef %2, %struct.__locale_struct* undef) #4
+  ret i64 %5
+}
+
+attributes #0 = { nounwind optsize strictfp "frame-pointer"="none" "min-legal-vector-width"="0" "no-builtins" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "strictfp" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }
+attributes #1 = { optsize "frame-pointer"="none" "no-builtins" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }
+attributes #2 = { nobuiltin nounwind optsize strictfp "no-builtins" }
+attributes #3 = { nounwind readnone strictfp }
+attributes #4 = { nobuiltin optsize strictfp "no-builtins" }
+
+!llvm.module.flags = !{!0, !1}
+!llvm.ident = !{!2}
+
+!0 = !{i32 1, !"wchar_size", i32 4}
+!1 = !{i32 7, !"PIC Level", i32 2}
+!2 = !{!"Ubuntu clang version 14.0.6"}
+!3 = !{!4, !4, i64 0}
+!4 = !{!"int", !5, i64 0}
+!5 = !{!"omnipotent char", !6, i64 0}
+!6 = !{!"Simple C/C++ TBAA"}
+!7 = !{i64 268176}

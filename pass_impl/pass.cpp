@@ -10,6 +10,7 @@ namespace{
         SyscallExtractionPass() : ModulePass(ID){};
         virtual bool runOnModule(Module &M)
         {
+            errs()<<"Module name is: "<<M.getName()<<"\n";
             string temporaryFileDirectory;
             for(string arg: Lists){
                 temporaryFileDirectory = arg;
@@ -24,12 +25,21 @@ namespace{
                 }
                 // currentFunction.viewCFG();
                 CFG currentCFG = buildCFG(currentFunction);
-                currentCFG.printDetails();
+                // currentCFG.printDetails();
                 DDG currentDDG = buildDDG(currentFunction);
                 string ddg_file_name = "/"+currentFunction.getName().str()+"_ddg.txt";
                 string saveLocation = temporaryFileDirectory + ddg_file_name;
                 writeDDGToFile(currentDDG.getDDG(), currentDDG.getTypeMap(), saveLocation);
             }
+            return false;
+        }
+    };
+
+    struct SyscallFinderPass: public ModulePass{
+        static char ID;
+        SyscallFinderPass(): ModulePass(ID){};
+        virtual bool runOnModule(Module &M){
+            
             return false;
         }
     };

@@ -1,13 +1,16 @@
 #include "utility.cpp"
 #include "print_utility.cpp"
 
-namespace{
+namespace
+{
 
-    static bool exists(DDG_GRAPH &G, string key){
+    static bool exists(DDG_GRAPH &G, string key)
+    {
         return G.find(key) != G.end();
     }
 
-    static bool exists(GRAPH &G, string key){
+    static bool exists(GRAPH &G, string key)
+    {
         return G.find(key) != G.end();
     }
 
@@ -29,6 +32,8 @@ namespace{
             ddg[source] = children;
         }
     }
+
+    
 
     static void parseInstructionForDDG(Instruction &inst, DDG_GRAPH &ddg, map<string, string> &typeMap)
     {
@@ -54,11 +59,6 @@ namespace{
             typeMap[storeLocationName] = storeLocationType;
 
             addEdgeDDG(ddg, storingElementName, storeLocationName, "store");
-
-            // errs()<<"Found Store Instruction.\n";
-            // errs()<<"Is return is :"<<storeInst->willReturn()<<"\n";
-            // errs()<<"Operand 0: "<<getStringRepresentationOfValue(storingElement)<<" Type: "<<storingElementType<<"\n";
-            // errs()<<"Operand 1: "<<getStringRepresentationOfValue(storeLocation)<<" Type: "<<storeLocationType<<"\n";
         }
         else if (isa<LoadInst>(inst))
         {
@@ -75,11 +75,6 @@ namespace{
             typeMap[loadingFromName] = loadingFromType;
 
             addEdgeDDG(ddg, loadingFromName, loadingToName, "load");
-
-            // errs()<<"Found load instruction\n";
-            // errs()<<"Will return is: "<<loadInst->willReturn()<<"\n";
-            // errs()<<"Loading to: "<<loadingToName<<" of Type: "<<loadingToType<<" ";
-            // errs()<<"From "<<loadingFromName<<" of Type: "<<loadingFromType<<"\n";
         }
         else if (isa<CallInst>(inst))
         {
@@ -87,23 +82,17 @@ namespace{
             string functionName;
             if (callInst->isInlineAsm())
             {
-                // We still need the return address and the operand List
-                // This is actually a very rare case in user-space program
                 functionName = "asm";
+                parseInlineAssemblyString(getInstructionString(&inst), callInst);
             }
             else
             {
-                // This is the usual case
-                // We need the function name, function's return value
-                // And operand list
                 functionName = callInst->getCalledFunction()->getName().str();
             }
             Value *returnPoint = dyn_cast<Value>(&inst);
             string returnPointName = getStringRepresentationOfValue(returnPoint);
             string returnPointType = getTypeFromAddress(returnPoint->getType());
             typeMap[returnPointName] = returnPointType;
-
-            // errs() << "Function " << functionName << " will return to " << returnPointName << " with type " << returnPointType << "\n";
 
             int numOperands = callInst->getNumOperands();
             for (int i = 0; i < numOperands - 1; i++)
@@ -115,9 +104,7 @@ namespace{
                 string label = "call:";
                 label = label.append(functionName);
                 addEdgeDDG(ddg, argumentName, returnPointName, label);
-                // errs() << "Argument Number: " << i << " Value: " << argumentName << " Type: " << argumentType << "\n";
             }
-            // errs() << "\n";
         }
         else if (isa<GetElementPtrInst>(inst))
         {
@@ -125,8 +112,6 @@ namespace{
             string returnPointName = getStringRepresentationOfValue(argument);
             string returnPointType = getTypeFromAddress(argument->getType());
             typeMap[returnPointName] = returnPointType;
-
-            // errs() << "GetelementPointer will return to " << returnPointName << " with type " << returnPointType << "\n";
 
             GetElementPtrInst *gepInst = dyn_cast<GetElementPtrInst>(&inst);
             int numOperands = gepInst->getNumOperands();
@@ -137,17 +122,15 @@ namespace{
                 string operandType = getTypeFromAddress(operand->getType());
                 typeMap[operandName] = operandType;
                 addEdgeDDG(ddg, operandName, returnPointName, "getelementptr");
-                // errs() << "Operand " << i << " Operand Name: " << operandName << " Operand Type: " << operandType << "\n";
             }
-            // errs() << "\n";
         }
         else if (isa<ReturnInst>(inst))
         {
-            // [ TODO: Figure out what to do with return type ]
             ReturnInst *retInst = dyn_cast<ReturnInst>(&inst);
             Value *retVal = retInst->getReturnValue();
             string retValName = getStringRepresentationOfValue(retVal);
-            if(retVal != NULL){
+            if (retVal != NULL)
+            {
                 addEdgeDDG(ddg, retValName, retValName, "return");
             }
         }
@@ -157,7 +140,6 @@ namespace{
             string returnPointName = getStringRepresentationOfValue(val);
             string returnPointType = getTypeFromAddress(val->getType());
             typeMap[returnPointName] = returnPointType;
-            // errs() << "Truncation will return to " << returnPointName << " with type " << returnPointType << "\n";
 
             Value *argument = inst.getOperand(0);
             string truncationArgument = getStringRepresentationOfValue(argument);
@@ -165,8 +147,6 @@ namespace{
             typeMap[truncationArgument] = truncationArgumentType;
 
             addEdgeDDG(ddg, truncationArgument, returnPointName, "truncate");
-
-            // errs() << "Operand Name: " << truncationArgument << " Operand Type: " << truncationArgumentType << "\n\n";
         }
         else if (isa<BranchInst>(&inst))
         {
@@ -198,14 +178,10 @@ namespace{
         }
         else
         {
-            // [TODO: Add more instruction type + Analyze which ones are needed for our use case.]
             Value *val = dyn_cast<Value>(&inst);
             string returnPointName = getStringRepresentationOfValue(val);
             string returnPointType = getTypeFromAddress(val->getType());
             typeMap[returnPointName] = returnPointType;
-
-            // errs()<<"Instruction Name: "<<getTypeFromAddress(inst.getType()) <<" Return Point :"<<returnPointName<<" Return Type: "<<returnPointType<<"\n";
-
             int numOperands = inst.getNumOperands();
             for (int i = 0; i < numOperands; i++)
             {
@@ -216,9 +192,30 @@ namespace{
 
                 addEdgeDDG(ddg, operandName, returnPointName, inst.getOpcodeName());
             }
-            // errs()<<"\n";
         }
     }
 
+    static void parseInlineAssemblyString(string instructionString, CallInst *call)
+    {
+
+        regex pattern("\"([^\"]*)\"");
+        sregex_iterator start(instructionString.begin(), instructionString.end(), pattern);
+        sregex_iterator end;
+        for (sregex_iterator current = start; current != end; ++current)
+        {
+            smatch match = *current;
+            errs() << match.str() << "\n";
+        }
+        errs() << "Parsing complete.\n";
+
+        assert(call != NULL);
+        int numOperands = call->getNumOperands();
+        for (int i = 0; i < numOperands - 1; i++)
+        {
+            Value *operand = call->getArgOperand(i);
+            operand->print(errs(), false);
+            errs() << "\n";
+        }
+    }
 
 }

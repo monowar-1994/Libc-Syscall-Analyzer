@@ -80,7 +80,6 @@ namespace{
 
     };
 
-
     static void insert(GRAPH &G, string parent, string child){
         if(exists(G, parent)){
             G[parent].push_back(child);
