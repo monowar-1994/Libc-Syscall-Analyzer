@@ -14,5 +14,22 @@
     "308": ["setns", "WasTriggeredBy"],
     "272": ["unshare", "WasTriggeredBy"],
     "60": ["exit", "WasTriggeredBy"],
-    "231": ["exitgroup", "WasTriggeredBy"]
+    "231": ["exitgroup", "WasTriggeredBy"],
+    "62": ["kill", "WasTriggeredBy"],
+    "101": ["ptrace", "WasTriggeredBy"],
+    "43": ["accept", "Used"],
+    "288": ["accept4", "Used"],
+    "295": ["preadv", "Used"],
+    "17": ["pread", "Used"],
+    "19": ["readv", "Used"],
+    "243": ["mq_timedreceive", "Used"],
+    "45": ["recvfrom", "Used"],
+    "47": ["recvmsg", "Used"],
+    "175": ["init_module", "Used"],
+    "313": ["finit_module", "Used"],
+    "70": ["msgrcv", "Used"],
+    "85": ["creat", "WasGeneratedBy"],
+    "90": ["chmod", "WasGeneratedBy"],
+    "91": ["fchmod", "WasGeneratedBy"],
+    "268": ["fchmodat", "WasGeneratedBy"]
 }

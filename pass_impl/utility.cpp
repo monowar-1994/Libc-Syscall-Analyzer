@@ -9,6 +9,8 @@
 #include <regex>
 #include <iterator>
 #include <set>
+#include<sys/file.h>
+
 
 // LLVM dependencies
 #include "llvm/Pass.h"
@@ -37,6 +39,7 @@
 
 using namespace llvm;
 using namespace std;
+using namespace sys::fs;
 
 typedef list<string> PATH;
 typedef pair<string, string> EDGE;

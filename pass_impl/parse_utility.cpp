@@ -83,7 +83,7 @@ namespace
             if (callInst->isInlineAsm())
             {
                 functionName = "asm";
-                parseInlineAssemblyString(getInstructionString(&inst), callInst);
+                // parseInlineAssemblyString(getInstructionString(&inst), callInst);
             }
             else
             {
@@ -195,27 +195,34 @@ namespace
         }
     }
 
-    static void parseInlineAssemblyString(string instructionString, CallInst *call)
+    static pair<vector<string>, vector<Value *>> parseInlineAssemblyString(string instructionString, CallInst *call)
     {
 
         regex pattern("\"([^\"]*)\"");
         sregex_iterator start(instructionString.begin(), instructionString.end(), pattern);
         sregex_iterator end;
+        vector<string> parsedComponents;
         for (sregex_iterator current = start; current != end; ++current)
         {
             smatch match = *current;
-            errs() << match.str() << "\n";
+            string matchedString = match.str().substr(1);
+            string trimmedMatchedString = matchedString.substr(0,matchedString.size()-1);
+            parsedComponents.push_back(trimmedMatchedString);
+            // errs() << match.str() << "\n";
         }
-        errs() << "Parsing complete.\n";
+        // errs() << "Parsing complete.\n";
 
         assert(call != NULL);
         int numOperands = call->getNumOperands();
+        vector<Value *> arguments;
         for (int i = 0; i < numOperands - 1; i++)
         {
             Value *operand = call->getArgOperand(i);
-            operand->print(errs(), false);
-            errs() << "\n";
+            arguments.push_back(operand);
+            // operand->print(errs(), false);
+            // errs() << "\n";
         }
+        return make_pair(parsedComponents, arguments);
     }
 
 }

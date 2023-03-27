@@ -1,5 +1,6 @@
 #include "graph_utility.cpp"
 
+
 namespace{
 
     cl::list<string> Lists("temp-location", cl::desc("Specify The Directory of Temorary File Location (DDG and other types of graphs)."), cl::OneOrMore);
@@ -10,7 +11,7 @@ namespace{
         SyscallExtractionPass() : ModulePass(ID){};
         virtual bool runOnModule(Module &M)
         {
-            errs()<<"Module name is: "<<M.getName()<<"\n";
+            // errs()<<"Module name is: "<<M.getName()<<"\n";
             string temporaryFileDirectory;
             for(string arg: Lists){
                 temporaryFileDirectory = arg;
@@ -39,19 +40,28 @@ namespace{
         static char ID;
         SyscallFinderPass(): ModulePass(ID){};
         virtual bool runOnModule(Module &M){
-            
+            string moduleName = M.getName().str();
+            bool containsSyscall = false;
+
+            for(Module::iterator it = M.begin(); it != M.end(); it++){
+                Function &currentFunction = *it;
+                pair<bool,vector<int>> syscallAnalysisResult = syscallFinder(currentFunction);
+            }
             return false;
         }
     };
 }
 
 char SyscallExtractionPass::ID = 0;
+char SyscallFinderPass::ID = 1;
 
 static RegisterPass<SyscallExtractionPass> X("syscall-extract", "Pass to extract syscalls from function definitons");
+static RegisterPass<SyscallFinderPass> Y("syscall-find", "Pass to Find syscalls from function definitons");
 
-static void registerSyscallPass(const PassManagerBuilder &, legacy::PassManagerBase &PM)
+static void registerSyscallPasses(const PassManagerBuilder &, legacy::PassManagerBase &PM)
 {
+    PM.add(new SyscallFinderPass());
     PM.add(new SyscallExtractionPass());
 }
 
-static RegisterStandardPasses RegisterCustomSyscallExtractPass(PassManagerBuilder::EP_EarlyAsPossible, registerSyscallPass);
+static RegisterStandardPasses RegisterCustomSyscallExtractPass(PassManagerBuilder::EP_EarlyAsPossible, registerSyscallPasses);

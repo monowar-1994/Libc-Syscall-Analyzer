@@ -12,6 +12,6 @@ cd Target
 #clang -S -emit-llvm -o ./Target/target.ll test.c
 #cd Target
 #pwd
-opt -load ${PASS_LOCATION}/libSyscallExtractPass.so -syscall-extract -temp-location ${ROOT_DIR}/Temp target.ll -enable-new-pm=0 > /dev/null
+opt -load ${PASS_LOCATION}/libSyscallExtractPass.so -syscall-find -temp-location ${ROOT_DIR}/Temp target.ll -enable-new-pm=0 > /dev/null
 
 

@@ -140,4 +140,35 @@ namespace{
 
         return ddg;
     }
+
+    static pair<bool, vector<int>> syscallFinder(Function &F){
+        bool result = false;
+        vector<int> syscalls;
+        for(BasicBlock &BB: F){
+            for(Instruction &I:BB){
+                if(isa<CallInst>(&I)){
+                    CallInst *call = dyn_cast<CallInst>(&I);
+                    if(call->isInlineAsm()){
+                        auto inlineAssemblyInfo = parseInlineAssemblyString(getInstructionString(&I), call);
+                        vector<string> inlineAssemblyStrings = inlineAssemblyInfo.first;
+                        vector<Value *> inlineAssemblyParams = inlineAssemblyInfo.second;
+                        if(inlineAssemblyStrings.size()>0){
+                            string asmCommand = inlineAssemblyStrings[0];
+                            if(asmCommand == "syscall" || asmCommand == "Syscall" || asmCommand == "SYSCALL"){
+                                errs()<<"Found a syscall: ";
+                                result |= true;
+                                
+                                Value *syscallNum = inlineAssemblyParams[0];
+                                int syscallNumberInt = stoi(getStringRepresentationOfValue(syscallNum));
+                                errs()<<syscallNumberInt<<"\n";
+                                syscalls.push_back(syscallNumberInt);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return make_pair(result, syscalls);
+    }
 }
