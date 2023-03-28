@@ -45,7 +45,12 @@ namespace{
 
             for(Module::iterator it = M.begin(); it != M.end(); it++){
                 Function &currentFunction = *it;
+                if(currentFunction.getBasicBlockList().size()==0){continue;}
                 pair<bool,vector<int>> syscallAnalysisResult = syscallFinder(currentFunction);
+                // if(syscallAnalysisResult.first){
+                //     string result = jsonifySyscallAnalysis(moduleName, currentFunction.getName().str(), syscallAnalysisResult);
+                //     errs()<<result<<"\n";
+                // }
             }
             return false;
         }

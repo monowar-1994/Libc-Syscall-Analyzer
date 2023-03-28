@@ -7,6 +7,8 @@ add_library(SyscallExtractPass MODULE
     parse_utility.cpp
 )
 
+add_library(jsoncpp SHARED IMPORTED)
+
 # Use C++11 to compile our pass (i.e., supply -std=c++11).
 target_compile_features(SyscallExtractPass PRIVATE cxx_range_for cxx_auto_type)
 

@@ -33,6 +33,7 @@
 #include "llvm/Support/CommandLine.h"
 // JSON dependencies
 #include <jsoncpp/json/json.h>
+#include <jsoncpp/json/value.h>
 
 // Boost dependencies
 #include <boost/algorithm/string.hpp>

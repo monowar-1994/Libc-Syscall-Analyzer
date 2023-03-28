@@ -225,4 +225,31 @@ namespace
         return make_pair(parsedComponents, arguments);
     }
 
+    static string jsonifySyscallAnalysis(string moduleName, string currentFunctionName, pair<bool,vector<int>> &syscallAnalysisResult){
+        Json::Value syscalls;
+        Json::Value entry;
+        entry["Module"] = moduleName; 
+        entry["Function"]= currentFunctionName;
+        
+        entry["Syscalls"] = syscalls;
+        Json::StreamWriterBuilder writer;
+        writer["indentation"] = "";
+        string output = Json::writeString(writer, entry);
+        return output;
+
+        // string ret= "{";
+        // ret += "\"Module\":\""+moduleName+"\",";
+        // ret += "\"Function\":\""+currentFunctionName+"\",";
+        // ret += "\"Syscalls\": [";
+        // string temp;
+        // int len = syscallAnalysisResult.second.size();
+        // for(int i=0;i<len-1;i++){
+        //     temp+= "\"" + to_string(syscallAnalysisResult.second[i])+ "\"" +",";
+        // }
+        // temp+= "\""+ to_string(syscallAnalysisResult.second[len-1]) +"\"" +"]";
+        // ret+= temp;
+        // ret+="}";
+        // return ret;
+    }
+
 }

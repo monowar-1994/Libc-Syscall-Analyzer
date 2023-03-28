@@ -1,19 +1,41 @@
 #include "parse_utility.cpp"
 
 namespace{
+    enum State
+    {
+        WHITE,
+        GRAY,
+        BLACK
+    };
+
     class CFG{
     private:
         GRAPH graph;
         BB_MAP basicBlockMap;
         string rootBlock;
+        bool hasLoops;
+        GRAPH dag; // This one contains the back-edge less adj list
+        map<string, int> visited;
+        vector<string> loopingBlocks;
+        map<string, EDGE> backEdges;
+
     public:
-        CFG(){}
+        CFG(){hasLoops = false;}
         CFG(GRAPH &g, BB_MAP &bb_map, string root){
             graph = g;
             basicBlockMap = bb_map;
             rootBlock = root;
+            hasLoops = false;
         }
 
+        bool containsLoops(){
+            return hasLoops;
+        }
+
+        GRAPH &getDag(){
+            return dag;
+        }
+        
         GRAPH &getGraph(){
             return graph;
         }
@@ -44,6 +66,52 @@ namespace{
             printAdjacencyList(graph);
             errs()<<"\n\nPrinting the Basic Blocks:\n\n";
             printBB_MAP(basicBlockMap);
+        }
+
+        bool loopDfsUtil(GRAPH cfgAdjList, string node)
+        {
+            visited[node] = GRAY;
+            vector<string> children = cfgAdjList[node];
+            bool res = false;
+            for (string child : children)
+            {
+                if (visited[child] == GRAY)
+                {
+                    loopingBlocks.push_back(child);
+                    backEdges[node] = make_pair(node, child);
+                    res = true;
+                }
+                if (visited[child] == WHITE && loopDfsUtil(cfgAdjList, child))
+                {
+                    res = true;
+                }
+            }
+            visited[node] = BLACK;
+            return res;
+        }
+
+        bool containsLoop(GRAPH cfgAdjList, string root)
+        {
+            bool hasLoop = false;
+            for (auto key : cfgAdjList)
+            {
+                visited[key.first] = WHITE;
+            }
+
+            hasLoop = loopDfsUtil(cfgAdjList, root);
+
+            return hasLoop;
+        }
+
+        void performLoopAnalysis(){
+            bool gotLoop = containsLoop(graph, rootBlock);
+            if(gotLoop){
+
+            }
+        }
+
+        void process(){
+
         }
         
     };
