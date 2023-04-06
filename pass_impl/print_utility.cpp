@@ -1,6 +1,46 @@
 #include "utility.cpp"
 
 namespace{
+
+    static void printLoopingBlocks(vector<string> loopingBlocks)
+    {
+        errs() << "Looping blocks are: ";
+        for (auto elem : loopingBlocks)
+        {
+            errs() << elem << " ";
+        }
+        errs() << "\n";
+    }
+
+    static void printBackEdges(map<string, EDGE> backEdges)
+    {
+        for (auto &elem : backEdges)
+        {
+
+            errs() << elem.first << " : " << elem.second.first << " -> " << elem.second.second << "\n";
+        }
+    }
+
+    static void printPath(PATH p)
+    {
+        errs() << "START -> ";
+        for (string s : p)
+        {
+            errs() << s << " ->";
+        }
+        errs() << " END\n";
+    }
+
+    static void printPaths(vector<PATH> paths)
+    {
+        int pathNum = 0;
+        for (PATH path : paths)
+        {
+            errs() << "Path Number: " << ++pathNum << "\n";
+            printPath(path);
+        }
+    }
+
     static string getSimpleNodeLabel(const BasicBlock &Node)
     { // Copied from Stack Overflow
         if (!Node.getName().empty())
@@ -31,10 +71,10 @@ namespace{
         errs() << "Adjacency List Is:\n";
         for (auto key : _adjacencyList)
         {
-            errs() << key.first << " -> ";
+            errs() << key.first << " ";
             for (auto elem : key.second)
             {
-                errs() << elem << ", ";
+                errs() << elem << " ";
             }
             errs() << "\n";
         }
@@ -126,6 +166,27 @@ namespace{
             }
         }
         output.close();
+    }
+
+    static string intVectorToString(vector<int> &in){
+        if(in.size() == 0){
+            return "";
+        }
+        stringstream ss;
+        for(int i=0;i<in.size();i++){
+            if(i!=0){
+                ss<<", ";
+            }
+            ss<<in[i];
+        }
+        return ss.str();
+    }
+
+    static void printSet(set<int> syscallList){
+        for(auto &elem: syscallList){
+            errs()<<elem<<" ,";
+        }
+        errs()<<"\n";
     }
 
 }

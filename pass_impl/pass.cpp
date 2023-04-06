@@ -11,26 +11,48 @@ namespace{
         SyscallExtractionPass() : ModulePass(ID){};
         virtual bool runOnModule(Module &M)
         {
-            // errs()<<"Module name is: "<<M.getName()<<"\n";
+            string syscallFileName = "/home/rashik/Documents/Providentia/libc_syscall_extract_standalone/syscall_list.json";
+            string resultFile = "/home/rashik/Documents/Providentia/libc_syscall_extract_standalone/Temp/relevantSyscallResults.txt";
             string temporaryFileDirectory;
             for(string arg: Lists){
                 temporaryFileDirectory = arg;
             }
-            errs()<<"Temporary files are stored in: "<<temporaryFileDirectory<<"\n";
-
+            errs()<<"Module: "<<M.getName().str()<<"\n";
+            set<int> relevantSyscalls = readRelevantSyscallList(syscallFileName);
+            
             for(Module::iterator funcIt= M.begin(); funcIt != M.end(); ++funcIt){
                 Function &currentFunction = *funcIt;
                 if(currentFunction.getBasicBlockList().size()==0){
-                    errs()<< "Current Function: "<<currentFunction.getName().str()<<" Has 0 basic blocks.\n";
+                    // errs()<< "Current Function: "<<currentFunction.getName().str()<<" Has 0 basic blocks.\n";
                     continue;
                 }
-                // currentFunction.viewCFG();
-                CFG currentCFG = buildCFG(currentFunction);
-                // currentCFG.printDetails();
-                DDG currentDDG = buildDDG(currentFunction);
-                string ddg_file_name = "/"+currentFunction.getName().str()+"_ddg.txt";
-                string saveLocation = temporaryFileDirectory + ddg_file_name;
-                writeDDGToFile(currentDDG.getDDG(), currentDDG.getTypeMap(), saveLocation);
+                // // currentFunction.viewCFG();
+                // CFG currentCFG = buildCFG(currentFunction);
+                // currentCFG.process();
+                // // DDG currentDDG = buildDDG(currentFunction);
+                
+                
+                pair<bool,vector<int>> syscallAnalysisResult = syscallFinder(currentFunction);
+                set<int> tempSyscallList;
+                if(syscallAnalysisResult.first){
+                    bool hasRelevantSyscall = false;
+                    for(auto syscall: syscallAnalysisResult.second){
+                        if(relevantSyscalls.find(syscall) != relevantSyscalls.end()){
+                            tempSyscallList.insert(syscall);
+                        }
+                    }
+                }
+
+                // vector<BasicBlock *> blocksWithRelevantSyscalls =  getRelevantBasicBlocks(tempSyscallList, currentFunction);
+                if(tempSyscallList.size()>0){
+                    ofstream relevantSyscallIndexFile(resultFile, ios::app);
+                    relevantSyscallIndexFile<< M.getName().str()<<" : ";
+                    for(auto &elem: tempSyscallList){
+                        relevantSyscallIndexFile<< elem <<", ";
+                    }
+                    relevantSyscallIndexFile<<"\n";
+                    relevantSyscallIndexFile.close();
+                }
             }
             return false;
         }
@@ -47,10 +69,10 @@ namespace{
                 Function &currentFunction = *it;
                 if(currentFunction.getBasicBlockList().size()==0){continue;}
                 pair<bool,vector<int>> syscallAnalysisResult = syscallFinder(currentFunction);
-                // if(syscallAnalysisResult.first){
-                //     string result = jsonifySyscallAnalysis(moduleName, currentFunction.getName().str(), syscallAnalysisResult);
-                //     errs()<<result<<"\n";
-                // }
+                if(syscallAnalysisResult.first){
+                    string result = jsonifySyscallAnalysis(moduleName, currentFunction.getName().str(), syscallAnalysisResult);
+                    errs()<<result<<"\n";
+                }
             }
             return false;
         }

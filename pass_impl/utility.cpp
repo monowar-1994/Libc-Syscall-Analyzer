@@ -9,8 +9,8 @@
 #include <regex>
 #include <iterator>
 #include <set>
-#include<sys/file.h>
-
+#include <sys/file.h>
+#include <fstream>
 
 // LLVM dependencies
 #include "llvm/Pass.h"

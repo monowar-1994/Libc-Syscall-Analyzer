@@ -14,11 +14,16 @@ namespace
         return G.find(key) != G.end();
     }
 
+    static bool exists(vector<string> &holder, string key)
+    {
+        return find(holder.begin(), holder.end(), key) != holder.end();
+    }
+
     static void addEdgeDDG(DDG_GRAPH &ddg, string source, string dest, string label)
     {
         if (source == "<badref>" || dest == "<badref>")
         {
-            errs() << "Badref found. Exiting without adding the edges.\n";
+            // errs() << "Badref found. Exiting without adding the edges.\n";
             return;
         }
         if (exists(ddg, source))
@@ -230,7 +235,8 @@ namespace
         Json::Value entry;
         entry["Module"] = moduleName; 
         entry["Function"]= currentFunctionName;
-        
+        syscalls["Status"] = syscallAnalysisResult.first;
+        syscalls["List"] = intVectorToString(syscallAnalysisResult.second);
         entry["Syscalls"] = syscalls;
         Json::StreamWriterBuilder writer;
         writer["indentation"] = "";
@@ -250,6 +256,18 @@ namespace
         // ret+= temp;
         // ret+="}";
         // return ret;
+    }
+
+    static set<int> readRelevantSyscallList(string filename){
+        ifstream inputStream(filename);
+        Json::Value actual_data;
+        Json::Reader reader;
+        reader.parse(inputStream, actual_data);
+        set<int> syscallNumbers;
+        for(auto &num: actual_data.getMemberNames()){
+            syscallNumbers.insert(stoi(num));
+        }
+        return syscallNumbers;
     }
 
 }
